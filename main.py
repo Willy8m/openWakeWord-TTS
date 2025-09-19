@@ -1,10 +1,10 @@
 import os
+import io
 import argparse
 from dotenv import load_dotenv
+from pydub import AudioSegment, effects
 import azure.cognitiveservices.speech as speechsdk
 
-from pydub import AudioSegment, effects
-import io
 from helpers.create_ssml import create_ssml
 
 """This script generates audio from text through the azure TTS api.
@@ -12,7 +12,7 @@ You will need a subscription key to be set up on .env file (see README setup & u
 For config params: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
 """
 
-AUDIOS_OUTPUT_FOLDER = r"audios"
+AUDIOS_OUTPUT_FOLDER = r"F:\models"
 TXT_FOLDER = r"txt"
 
 # === CONFIG ===
@@ -91,8 +91,8 @@ def read_to_list(path):
 
 def train_test_split(ls: list, test_size: float = 0.2):
     split_idx = int(len(ls) * test_size)
-    train = ls[:split_idx]
-    test = ls[split_idx:]
+    test = ls[:split_idx]
+    train = ls[split_idx:]
     return (train, test)
 
 
