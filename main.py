@@ -103,19 +103,20 @@ def generate_audios(words, voices, speech_config, output_folder, isTest=True, si
     if isTest:
         def tqdm(x):
             return x
-        RATES, PITCHES, STYLES, ROLES = [0], [0], [None], [None]
+        rates, pitches, styles, roles = [0], [0], [None], [None]
     else:
         from tqdm import tqdm
-        if RATES == [] or PITCHES == [] or STYLES == [] or ROLES == []:
+        rates, pitches, styles, roles = RATES, PITCHES, STYLES, ROLES
+        if rates == [] or pitches == [] or styles == [] or roles == []:
             raise ValueError
 
     for voice in tqdm(voices):
         count = 0
         for word in words:
-            for rate in RATES:
-                for pitch in PITCHES:
-                    for style in STYLES:
-                        for role in ROLES:
+            for rate in rates:
+                for pitch in pitches:
+                    for style in styles:
+                        for role in roles:
                             locale = voice[:5]   # e.g., "es-US"
                             people = voice[6:]   # e.g., "PalomaNeural"
 
