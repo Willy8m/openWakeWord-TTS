@@ -1,20 +1,44 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# WakeWord audio gen
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+**Objective:** Generate audios to train a wake word spotting model.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+**Problem:** Synthetic speakers from Text-To-Speech (TTS) models usually generate the same audio output on the same input string, this is not ideal for training a Wake-Word-Spotting (WWS) model. 
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+**Solution:** This can be overcome by manually forcing phonetic variations on the input strings. 
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+To create phonetical variations manually, what works best is modifying letters (i -> y) or adding dashes (-) commas (,) and spaces ( ).
+
+Example: "ayud", "a yud", "aiut", "haiut".
+
+*Note: Long and phonetically complex words are recommended: better "hola pepito" than "teo".*
+
+## Usage
+
+Inside ``txt/``, create a folder named ``<your_wakeword>/`` with two files: ``positive_<your_wakeword>.txt`` & ``negative_<your_wakeword>.txt``
+Then add any words you want for positive or negative (adversarial) tts generation
+
+Run a test generation with a single voice with
+```` bash
+uv run python main.py --wakeword hola-pepito --test
+````
+
+When you find optimal results, run with all voices. __Note__: *this will consume from your azure subscription, so be careful*
+```` bash
+uv run python main.py --wakeword hola-pepito
+````
+
+## Setup environment
+
+````bash
+uv sync
+````
+
+Create .env file
+````
+AZURE_SPEECH_KEY=<key>
+AZURE_SPEECH_REGION=<region>
+````
+
+## Reference
+
+- TTS docs: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
