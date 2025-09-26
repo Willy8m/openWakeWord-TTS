@@ -12,8 +12,8 @@ You will need a subscription key to be set up on .env file (see README setup & u
 For config params: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
 """
 
-AUDIOS_OUTPUT_FOLDER = r"F:\models"
-TXT_FOLDER = r"txt"
+AUDIOS_OUTPUT_FOLDER = r"output_audios"
+WORDS_FOLDER = r"input_words"
 
 # === CONFIG ===
 VOICES = ["ca-ES-EnricNeural", "ca-ES-AlbaNeural", "ca-ES-JoanaNeural", "es-AR-ElenaNeural", "es-AR-TomasNeural", "es-BO-SofiaNeural", "es-BO-MarceloNeural", "es-CL-CatalinaNeural", "es-CL-LorenzoNeural", "es-CO-SalomeNeural", "es-CO-GonzaloNeural", "es-CR-MariaNeural", "es-CR-JuanNeural", "es-CU-BelkysNeural", "es-CU-ManuelNeural", "es-DO-RamonaNeural", "es-DO-EmilioNeural", "es-EC-AndreaNeural", "es-EC-LuisNeural", "es-ES-ElviraNeural", "es-ES-AlvaroNeural", "es-ES-AbrilNeural", "es-ES-ArnauNeural", "es-ES-DarioNeural", "es-ES-EliasNeural", "es-ES-EstrellaNeural", "es-ES-IreneNeural", "es-ES-LaiaNeural", "es-ES-LiaNeural", "es-ES-NilNeural", "es-ES-SaulNeural", "es-ES-TeoNeural", "es-ES-TrianaNeural", "es-ES-VeraNeural", "es-ES-XimenaNeural", "es-ES-ArabellaMultilingualNeural", "es-ES-IsidoraMultilingualNeural", "es-ES-TristanMultilingualNeural", "es-ES-XimenaMultilingualNeural", "es-GQ-TeresaNeural", "es-GQ-JavierNeural", "es-GT-MartaNeural", "es-GT-AndresNeural", "es-HN-KarlaNeural", "es-HN-CarlosNeural", "es-MX-DaliaNeural", "es-MX-JorgeNeural", "es-MX-BeatrizNeural", "es-MX-CandelaNeural", "es-MX-CarlotaNeural", "es-MX-CecilioNeural", "es-MX-GerardoNeural", "es-MX-LarissaNeural", "es-MX-LibertoNeural", "es-MX-LucianoNeural", "es-MX-MarinaNeural", "es-MX-NuriaNeural", "es-MX-PelayoNeural", "es-MX-RenataNeural", "es-MX-YagoNeural", "es-NI-YolandaNeural", "es-NI-FedericoNeural", "es-PA-MargaritaNeural", "es-PA-RobertoNeural", "es-PE-CamilaNeural", "es-PE-AlexNeural", "es-PR-KarinaNeural", "es-PR-VictorNeural", "es-PY-TaniaNeural", "es-PY-MarioNeural", "es-SV-LorenaNeural", "es-SV-RodrigoNeural", "es-US-PalomaNeural", "es-US-AlonsoNeural"]
@@ -40,9 +40,9 @@ def main():
     print("Setting up TTS...")
     speech_config = setup_tts()
 
-    print(f"Loading words from .txt files... (at {TXT_FOLDER})")
-    neg = read_to_list(os.path.join(TXT_FOLDER, wakeword, f"negative_{wakeword}.txt"))
-    pos = read_to_list(os.path.join(TXT_FOLDER, wakeword, f"positive_{wakeword}.txt"))
+    print(f"Loading words from .txt files... (at {WORDS_FOLDER})")
+    neg = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"neg.txt"))
+    pos = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"pos.txt"))
 
     print(f"Preparing output folders... (at {AUDIOS_OUTPUT_FOLDER})")
     if isTest:
