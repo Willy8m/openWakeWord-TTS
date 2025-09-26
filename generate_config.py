@@ -38,6 +38,7 @@ def get_next_model_version(models_dir: Path, wakeword: str, data_version: int) -
 
 def generate_yaml(base_path: str, wakeword: str, data_version: int, model_version: int) -> dict:
     return {
+        "wakeword": f"{wakeword}",
         "output_dir": f"{base_path}models/{wakeword}",
         "data_folder": f"{wakeword}_{data_version}",
         "model_name": f"{wakeword}_{data_version}_{model_version}",
@@ -81,7 +82,7 @@ def generate_yaml(base_path: str, wakeword: str, data_version: int, model_versio
 
 def main():
     parser = argparse.ArgumentParser(description="Generate a YAML config for wakeword training.")
-    parser.add_argument("--base_path", required=True, help="Base path with drive for data and models")
+    parser.add_argument("--base_path", required=True, help="Base path for data and models")
     parser.add_argument("--wakeword", required=True, help="Wakeword name")
     args = parser.parse_args()
 

@@ -3,6 +3,7 @@ import io
 import argparse
 from dotenv import load_dotenv
 from pydub import AudioSegment, effects
+import yaml
 import azure.cognitiveservices.speech as speechsdk
 
 from helpers.create_ssml import create_ssml
@@ -12,7 +13,6 @@ You will need a subscription key to be set up on .env file (see README setup & u
 For config params: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
 """
 
-AUDIOS_OUTPUT_FOLDER = r"output_audios"
 WORDS_FOLDER = r"input_words"
 
 # === CONFIG ===
@@ -24,50 +24,53 @@ ROLES = [None]      # e.g., ["YoungAdultFemale", "SeniorMale"]
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--wakeword", required=True, type=str, help="wake word (separated by hyphens)")
-    parser.add_argument("--test", action="store_true", help="Run in test mode (only first voice, rate=0, pitch=0)")
+    parser.add_argument("--training_config", required=True, type=str, help="The path to the training config file (required)")
+    parser.add_argument("--test", action="store_true", help="Run in test mode: generate audios only for one speaker and save them to a new folder 'tts_test/'")
     parser.add_argument("--silence_len", default=1000, type=int, help="(in ms) increase value if wakeword is being split in the middle. default: 1000ms")
     parser.add_argument("--silence_padding", default=500, type=int, help="(in ms) increase if wakeword is being trimmed too soon at the end. default: 500ms")
     parser.add_argument("--silence_thresh", default=-40, type=int, help="(in dBFS) anything quieter than this will be considered silence. default: -40dBFS")
     args = parser.parse_args()
 
-    wakeword = args.wakeword
     isTest = args.test
     silence_len = args.silence_len
     silence_padding = args.silence_padding
     silence_thresh = args.silence_thresh
+
+    config = yaml.load(open(args.training_config, 'r').read(), yaml.Loader)
+    wakeword = config["wakeword"]
+    audios_output_folder = os.path.join(config["output_dir"], config["data_folder"])
  
     print("Setting up TTS...")
     speech_config = setup_tts()
 
     print(f"Loading words from .txt files... (at {WORDS_FOLDER})")
-    neg = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"neg.txt"))
-    pos = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"pos.txt"))
+    neg_words = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"neg.txt"))
+    pos_words = read_to_list(os.path.join(WORDS_FOLDER, wakeword, f"pos.txt"))
 
-    print(f"Preparing output folders... (at {AUDIOS_OUTPUT_FOLDER})")
+    print(f"Preparing output folders... (at {audios_output_folder})")
     if isTest:
         dirs = {
-            "pos": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "tts_test", "pos"),
-            "neg": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "tts_test", "neg")
+            "pos": os.path.join(audios_output_folder, "tts_test", "pos"),
+            "neg": os.path.join(audios_output_folder, "tts_test", "neg")
         }
     else:
         dirs = {
-            "pos_train": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "positive_train"),
-            "pos_test": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "positive_test"),
-            "neg_train": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "negative_train"),
-            "neg_test": os.path.join(AUDIOS_OUTPUT_FOLDER, wakeword, "negative_test"),
+            "pos_train": os.path.join(audios_output_folder, "positive_train"),
+            "pos_test": os.path.join(audios_output_folder, "positive_test"),
+            "neg_train": os.path.join(audios_output_folder, "negative_train"),
+            "neg_test": os.path.join(audios_output_folder, "negative_test"),
         }
 
     print("Starting the conversion...")
     if isTest:
-        generate_audios(pos, [VOICES[0]], speech_config, dirs["pos"], isTest, args.silence_len, silence_padding, silence_thresh)
-        generate_audios(neg, [VOICES[0]], speech_config, dirs["neg"], isTest, args.silence_len, silence_padding, silence_thresh)
+        generate_audios(pos_words, [VOICES[0]], speech_config, dirs["pos"], isTest, silence_len, silence_padding, silence_thresh)
+        generate_audios(neg_words, [VOICES[0]], speech_config, dirs["neg"], isTest, silence_len, silence_padding, silence_thresh)
     else:
         train_voices, test_voices = train_test_split(VOICES)
-        generate_audios(pos, train_voices, speech_config, dirs["pos_train"], isTest, silence_len, silence_padding, silence_thresh)
-        generate_audios(pos, test_voices,  speech_config, dirs["pos_test"],  isTest, silence_len, silence_padding, silence_thresh)
-        generate_audios(neg, train_voices, speech_config, dirs["neg_train"], isTest, silence_len, silence_padding, silence_thresh)
-        generate_audios(neg, test_voices,  speech_config, dirs["neg_test"],  isTest, silence_len, silence_padding, silence_thresh)
+        generate_audios(pos_words, train_voices, speech_config, dirs["pos_train"], isTest, silence_len, silence_padding, silence_thresh)
+        generate_audios(pos_words, test_voices,  speech_config, dirs["pos_test"],  isTest, silence_len, silence_padding, silence_thresh)
+        generate_audios(neg_words, train_voices, speech_config, dirs["neg_train"], isTest, silence_len, silence_padding, silence_thresh)
+        generate_audios(neg_words, test_voices,  speech_config, dirs["neg_test"],  isTest, silence_len, silence_padding, silence_thresh)
 
 
 def setup_tts():
