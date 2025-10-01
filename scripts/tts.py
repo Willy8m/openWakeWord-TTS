@@ -16,7 +16,8 @@ For config params: https://learn.microsoft.com/en-us/azure/ai-services/speech-se
 WORDS_FOLDER = r"input_words"
 
 # === CONFIG ===
-VOICES = ["ca-ES-EnricNeural", "ca-ES-AlbaNeural", "ca-ES-JoanaNeural", "es-AR-ElenaNeural", "es-AR-TomasNeural", "es-BO-SofiaNeural", "es-BO-MarceloNeural", "es-CL-CatalinaNeural", "es-CL-LorenzoNeural", "es-CO-SalomeNeural", "es-CO-GonzaloNeural", "es-CR-MariaNeural", "es-CR-JuanNeural", "es-CU-BelkysNeural", "es-CU-ManuelNeural", "es-DO-RamonaNeural", "es-DO-EmilioNeural", "es-EC-AndreaNeural", "es-EC-LuisNeural", "es-ES-ElviraNeural", "es-ES-AlvaroNeural", "es-ES-AbrilNeural", "es-ES-ArnauNeural", "es-ES-DarioNeural", "es-ES-EliasNeural", "es-ES-EstrellaNeural", "es-ES-IreneNeural", "es-ES-LaiaNeural", "es-ES-LiaNeural", "es-ES-NilNeural", "es-ES-SaulNeural", "es-ES-TeoNeural", "es-ES-TrianaNeural", "es-ES-VeraNeural", "es-ES-XimenaNeural", "es-ES-ArabellaMultilingualNeural", "es-ES-IsidoraMultilingualNeural", "es-ES-TristanMultilingualNeural", "es-ES-XimenaMultilingualNeural", "es-GQ-TeresaNeural", "es-GQ-JavierNeural", "es-GT-MartaNeural", "es-GT-AndresNeural", "es-HN-KarlaNeural", "es-HN-CarlosNeural", "es-MX-DaliaNeural", "es-MX-JorgeNeural", "es-MX-BeatrizNeural", "es-MX-CandelaNeural", "es-MX-CarlotaNeural", "es-MX-CecilioNeural", "es-MX-GerardoNeural", "es-MX-LarissaNeural", "es-MX-LibertoNeural", "es-MX-LucianoNeural", "es-MX-MarinaNeural", "es-MX-NuriaNeural", "es-MX-PelayoNeural", "es-MX-RenataNeural", "es-MX-YagoNeural", "es-NI-YolandaNeural", "es-NI-FedericoNeural", "es-PA-MargaritaNeural", "es-PA-RobertoNeural", "es-PE-CamilaNeural", "es-PE-AlexNeural", "es-PR-KarinaNeural", "es-PR-VictorNeural", "es-PY-TaniaNeural", "es-PY-MarioNeural", "es-SV-LorenaNeural", "es-SV-RodrigoNeural", "es-US-PalomaNeural", "es-US-AlonsoNeural"]
+# Note: ca voices not used since pronunciation is different e.g. "ho"->"u" ("ca-ES-EnricNeural", "ca-ES-AlbaNeural", "ca-ES-JoanaNeural")
+VOICES = ["es-AR-ElenaNeural", "es-AR-TomasNeural", "es-BO-SofiaNeural", "es-BO-MarceloNeural", "es-CL-CatalinaNeural", "es-CL-LorenzoNeural", "es-CO-SalomeNeural", "es-CO-GonzaloNeural", "es-CR-MariaNeural", "es-CR-JuanNeural", "es-CU-BelkysNeural", "es-CU-ManuelNeural", "es-DO-RamonaNeural", "es-DO-EmilioNeural", "es-EC-AndreaNeural", "es-EC-LuisNeural", "es-ES-ElviraNeural", "es-ES-AlvaroNeural", "es-ES-AbrilNeural", "es-ES-ArnauNeural", "es-ES-DarioNeural", "es-ES-EliasNeural", "es-ES-EstrellaNeural", "es-ES-IreneNeural", "es-ES-LaiaNeural", "es-ES-LiaNeural", "es-ES-NilNeural", "es-ES-SaulNeural", "es-ES-TeoNeural", "es-ES-TrianaNeural", "es-ES-VeraNeural", "es-ES-XimenaNeural", "es-ES-ArabellaMultilingualNeural", "es-ES-IsidoraMultilingualNeural", "es-ES-TristanMultilingualNeural", "es-ES-XimenaMultilingualNeural", "es-GQ-TeresaNeural", "es-GQ-JavierNeural", "es-GT-MartaNeural", "es-GT-AndresNeural", "es-HN-KarlaNeural", "es-HN-CarlosNeural", "es-MX-DaliaNeural", "es-MX-JorgeNeural", "es-MX-BeatrizNeural", "es-MX-CandelaNeural", "es-MX-CarlotaNeural", "es-MX-CecilioNeural", "es-MX-GerardoNeural", "es-MX-LarissaNeural", "es-MX-LibertoNeural", "es-MX-LucianoNeural", "es-MX-MarinaNeural", "es-MX-NuriaNeural", "es-MX-PelayoNeural", "es-MX-RenataNeural", "es-MX-YagoNeural", "es-NI-YolandaNeural", "es-NI-FedericoNeural", "es-PA-MargaritaNeural", "es-PA-RobertoNeural", "es-PE-CamilaNeural", "es-PE-AlexNeural", "es-PR-KarinaNeural", "es-PR-VictorNeural", "es-PY-TaniaNeural", "es-PY-MarioNeural", "es-SV-LorenaNeural", "es-SV-RodrigoNeural", "es-US-PalomaNeural", "es-US-AlonsoNeural"]
 RATES = [0]         # e.g., [-20, 0, 20]
 PITCHES = [0]       # e.g., [-10, 0, 10]
 STYLES = [None]     # e.g., ["cheerful", "sad"]
@@ -114,7 +115,6 @@ def generate_audios(words, voices, speech_config, output_folder, isTest=True, si
             raise ValueError
 
     for voice in tqdm(voices):
-        count = 0
         for word in words:
             for rate in rates:
                 for pitch in pitches:
@@ -127,7 +127,7 @@ def generate_audios(words, voices, speech_config, output_folder, isTest=True, si
                                 locale, voice, word, rate, pitch, style, role
                             )
 
-                            wav_name = f"{people}{count}_{word}.wav"
+                            wav_name = f"{people}_{word}.wav"
                             out_path = os.path.join(output_folder, wav_name)
 
                             stream = speechsdk.audio.PullAudioOutputStream()
@@ -151,8 +151,6 @@ def generate_audios(words, voices, speech_config, output_folder, isTest=True, si
                                 if cancellation.reason == speechsdk.CancellationReason.Error:
                                     print(f"ErrorCode: {cancellation.error_code}")
                                     print(f"ErrorDetails: {cancellation.error_details}")
-
-                            count += 1
 
 
 if __name__ == "__main__":

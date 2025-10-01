@@ -5,10 +5,26 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "acoustics>=0.2.6",
+    "audiomentations>=0.43.1",
     "azure-cognitiveservices-speech>=1.46.0",
+    "fastapi>=0.118.0",
+    "mutagen>=1.47.0",
     "numpy>=2.3.3",
+    "onnx>=1.19.0",
+    "onnxruntime>=1.23.0",
+    "pronouncing>=0.2.0",
     "pydub>=0.25.1",
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
+    "scipy>=1.16.2",
+    "speechbrain>=1.0.3",
+    "tensorflow>=2.20.0",
+    "torch>=2.8.0",
+    "torch-audiomentations>=0.12.0",
+    "torchinfo>=1.8.0",
+    "torchmetrics>=1.8.2",
+    "torchsummary>=1.5.1",
     "tqdm>=4.67.1",
+    "uvicorn>=0.37.0",
 ]

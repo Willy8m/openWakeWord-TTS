@@ -1,0 +1,39 @@
+Outputs folder. Example structure:
+
+````bash
+outputs/
+    hola-maia/
+        config/
+            01-10-2025T13.41.00/
+                hola-maia_v1_0_0.yaml
+        txt/
+            01-10-2025T13.41.00/
+                pos.txt
+                neg.txt
+        audio/
+            01-10-2025T13.41.00/
+                negative_test/ 
+                    (.wavs)
+                negative_train/ 
+                    (.wavs)
+                positive_test/ 
+                    (.wavs)
+                positive_train/ 
+                    (.wavs)
+                tts_test/
+                    pos/ 
+                        (.wavs)
+                    neg/ 
+                        (.wavs)
+        augmented_audio/
+            01-10-2025T13.41.00/
+                negative_features_test.npy
+                negative_features_train.npy
+                positive_features_test.npy
+                positive_features_train.npy
+        models/
+            01-10-2025T13.41.00/
+                hola-maia_v1_0_0_history.pkl
+                hola-maia_v1_0_0.onnx
+                hola-maia_v1_0_0.tflite
+````
