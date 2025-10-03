@@ -9,7 +9,7 @@ import argparse
 # -----------------------------
 # Configuration
 # -----------------------------
-OUTPUT_DIR = "outputs"
+OUTPUTS_DIR = "outputs"
 SCRIPTS_DIR = "scripts"
 
 # Enable logging
@@ -18,7 +18,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler(os.path.join(OUTPUT_DIR, "pipeline.log"))
+        logging.FileHandler(os.path.join(OUTPUTS_DIR, "pipeline.log"))
     ]
 )
 
@@ -47,28 +47,28 @@ def pipeline(wakewords):
         logging.info(f"=== Starting pipeline for wakeword: {wakeword} ===")
         
         # Define output folders for this wakeword
-        config_dir = os.path.join(OUTPUT_DIR, wakeword, "config", timestamp)
-        txt_dir = os.path.join(OUTPUT_DIR, wakeword, "txt", timestamp)
-        audio_dir = os.path.join(OUTPUT_DIR, wakeword, "audio", timestamp)
-        aug_dir = os.path.join(OUTPUT_DIR, wakeword, "augmented_audio", timestamp)
-        model_dir = os.path.join(OUTPUT_DIR, wakeword, "models", timestamp)
+        config_dir = os.path.join(OUTPUTS_DIR, wakeword, "config", timestamp)
+        txt_dir = os.path.join(OUTPUTS_DIR, wakeword, "txt", timestamp)
+        audio_dir = os.path.join(OUTPUTS_DIR, wakeword, "audio", timestamp)
+        aug_dir = os.path.join(OUTPUTS_DIR, wakeword, "augmented_audio", timestamp)
+        model_dir = os.path.join(OUTPUTS_DIR, wakeword, "models", timestamp)
         
-        create_folders(txt_dir, audio_dir, aug_dir, model_dir)
+        create_folders(config_dir, txt_dir, audio_dir, aug_dir, model_dir)
 
         # Step 0: Generate training config file
-        run_step("generate_config.py", output_folder=config_dir, wakeword=wakeword)
+        run_step("generate_config.py", wakeword=wakeword, outputs_dir=OUTPUTS_DIR, timestamp=timestamp)
         
         # Step 1: Generate text (OpenAI)
         run_step("generate_text.py", output_folder=txt_dir, config_dir=config_dir)
         
         # Step 2: TTS conversion
-        run_step("tts.py", input_folder=txt_dir, output_folder=audio_dir, config_dir=config_dir)
+        run_step("tts.py", input_folder=txt_dir, output_folder=audio_dir)
         
         # Step 3: Data augmentation
-        run_step("augment.py", input_folder=audio_dir, output_folder=aug_dir)
+        run_step("augment.py", input_folder=audio_dir, output_folder=aug_dir, config_dir=config_dir)
         
         # Step 4: Model training
-        run_step("train.py", input_folder=aug_dir, model_output=model_dir)
+        run_step("train.py", input_folder=aug_dir, model_output=model_dir, config_dir=config_dir)
         
         # Step 5: Upload to blob storage
         run_step("upload_blob.py", model_folder=model_dir, wakeword=wakeword)

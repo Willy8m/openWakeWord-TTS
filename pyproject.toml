@@ -13,6 +13,7 @@ dependencies = [
     "numpy>=2.3.3",
     "onnx>=1.19.0",
     "onnxruntime>=1.23.0",
+    "openai>=2.1.0",
     "pronouncing>=0.2.0",
     "pydub>=0.25.1",
     "python-dotenv>=1.1.1",
