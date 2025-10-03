@@ -12,7 +12,7 @@ if __name__ == "__main__":
     args.generate_clips = False
     args.augment_clips = True
     args.train_model = False
-    args.training_config = os.listdir(args.config_dir)[0]
+    args.training_config = os.path.join(args.config_dir, os.listdir(args.config_dir)[0])
     args.overwrite = False
 
     main(Model, convert_onnx_to_tflite, args)

@@ -10,8 +10,9 @@
   "f5c1321e-df01-4afa-a862-1b0420c114ae": {
     "id": "f5c1321e-df01-4afa-a862-1b0420c114ae",
     "wakeword": "hola-juan",
-    "status": "running",
+    "status": "failed",
     "created_at": 1759494177.3443346,
-    "log_file": "f5c1321e-df01-4afa-a862-1b0420c114ae.log"
+    "log_file": "f5c1321e-df01-4afa-a862-1b0420c114ae.log",
+    "finished_at": 1759495648.8577955
   }
 }
