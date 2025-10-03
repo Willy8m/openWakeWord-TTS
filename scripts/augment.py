@@ -1,0 +1,18 @@
+from openwakeword.train import main, Model, convert_onnx_to_tflite
+import argparse
+import os
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate phonetic variations for a wakeword.")
+    parser.add_argument("--input_folder", type=str, required=True, help="Folder with positive/negative train/test audios")
+    parser.add_argument("--output_folder", type=str, required=True, help="Folder to save augmented audio features")
+    parser.add_argument("--config_dir", type=str, required=True, help="Folder with training config")
+    args = parser.parse_args()
+
+    args.generate_clips = False
+    args.augment_clips = True
+    args.train_model = False
+    args.training_config = os.listdir(args.config_dir)[0]
+    args.overwrite = False
+
+    main(Model, convert_onnx_to_tflite, args)

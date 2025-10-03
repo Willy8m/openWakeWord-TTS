@@ -26,11 +26,11 @@ client = AzureOpenAI(
 )
 
 
-def generate_variations(wakeword: str):
+def generate_variations(wakeword: str, locale: str):
     """Generate positive and negative phonetic variations for a wakeword."""
 
     positive_prompt = f"""
-    Generate a list of at least 15 positive phonetic variations for the wakeword "{wakeword}".
+    Generate a list of at least 15 positive phonetic variations in {locale} for the wakeword "{wakeword}".
     These should sound similar but represent natural pronunciation variations, accents, or small distortions.
     Return them as a plain list, one per line, without numbering.
     """
@@ -38,7 +38,7 @@ def generate_variations(wakeword: str):
     negative_prompt = f"""
     Generate a list of at least 15 adversarial phonetic phrases that sound similar to "{wakeword}" 
     but are clearly different words or short phrases. 
-    The goal is to confuse a speech recognition model. 
+    The goal is to confuse a wake word spotting model. 
     Return them as a plain list, one per line, without numbering.
     """
 
@@ -58,19 +58,22 @@ def generate_variations(wakeword: str):
         temperature=0.8
     )
 
+    print(pos_response)
+    print(neg_response)
+
     positives = pos_response.choices[0].message.content.strip().splitlines()
     negatives = neg_response.choices[0].message.content.strip().splitlines()
 
     return positives, negatives
 
 
-def main(output_folder: str, wakeword: str):
+def main(output_folder: str, wakeword: str, locale: str):
     os.makedirs(output_folder, exist_ok=True)
 
     pos_file = os.path.join(output_folder, "pos.txt")
     neg_file = os.path.join(output_folder, "neg.txt")
 
-    positives, negatives = generate_variations(wakeword)
+    positives, negatives = generate_variations(wakeword, locale)
 
     with open(pos_file, "w", encoding="utf-8") as f:
         f.write("\n".join(positives))
@@ -85,9 +88,11 @@ def main(output_folder: str, wakeword: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate phonetic variations for a wakeword.")
     parser.add_argument("--output_folder", type=str, required=True, help="Folder to save pos.txt and neg.txt")
+    parser.add_argument("--locale", type=str, required=True, help="Locale to use for the generation of words")
     args = parser.parse_args()
 
     output_folder = Path(args.output_folder)
-    wakeword = output_folder.parent.parent
+    wakeword = output_folder.parent.parent.parts[-1]
+    locale = args.locale
 
-    main(output_folder, wakeword)
+    main(output_folder, wakeword, locale)

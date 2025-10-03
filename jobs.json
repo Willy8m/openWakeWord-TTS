@@ -1,0 +1,17 @@
+{
+  "9c44e004-8b0e-4ab3-868d-9eac32899a89": {
+    "id": "9c44e004-8b0e-4ab3-868d-9eac32899a89",
+    "wakeword": "hola-pepito",
+    "status": "failed",
+    "created_at": 1759494131.2018247,
+    "log_file": "9c44e004-8b0e-4ab3-868d-9eac32899a89.log",
+    "finished_at": 1759494135.6728795
+  },
+  "f5c1321e-df01-4afa-a862-1b0420c114ae": {
+    "id": "f5c1321e-df01-4afa-a862-1b0420c114ae",
+    "wakeword": "hola-juan",
+    "status": "running",
+    "created_at": 1759494177.3443346,
+    "log_file": "f5c1321e-df01-4afa-a862-1b0420c114ae.log"
+  }
+}

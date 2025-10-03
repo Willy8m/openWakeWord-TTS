@@ -1407,68 +1407,25 @@ def convert_onnx_to_tflite(onnx_model_path, output_path):
     return None
 
 
-if __name__ == '__main__':
-    # Get training config file
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--training_config",
-        help="The path to the training config file (required)",
-        type=str,
-        required=True
-    )
-    parser.add_argument(
-        "--generate_clips",
-        help="Execute the synthetic data generation process",
-        action="store_true",
-        default="False",
-        required=False
-    )
-    parser.add_argument(
-        "--augment_clips",
-        help="Execute the synthetic data augmentation process",
-        action="store_true",
-        default="False",
-        required=False
-    )
-    parser.add_argument(
-        "--overwrite",
-        help="Overwrite existing openwakeword features when the --augment_clips flag is used",
-        action="store_true",
-        default="False",
-        required=False
-    )
-    parser.add_argument(
-        "--train_model",
-        help="Execute the model training process",
-        action="store_true",
-        default="False",
-        required=False
-    )
+def main(Model, convert_onnx_to_tflite, args: argparse.Namespace, audio_folder=None, augmented_audio_folder=None, models_folder=None):
 
-    args = parser.parse_args()
     config = yaml.load(open(args.training_config, 'r').read(), yaml.Loader)
 
     # if no model name is given, training_config filename is used
-    if config["model_name"] == None:
-        model_name = os.path.splitext(os.path.basename(args.training_config))[0]
-        config["model_name"] = model_name
+    # if config["model_name"] == None:
+    #     model_name = os.path.splitext(os.path.basename(args.training_config))[0]
+    #     config["model_name"] = model_name
 
     # imports Piper for synthetic sample generation
     # sys.path.insert(0, os.path.abspath(config["piper_sample_generator_path"]))
     # from generate_samples import generate_samples
 
-    # Define output locations
-    config["output_dir"] = os.path.abspath(config["output_dir"])
-    if not os.path.exists(config["output_dir"]):
-        os.mkdir(config["output_dir"])
-    if not os.path.exists(os.path.join(config["output_dir"], config["data_folder"])):
-        os.mkdir(os.path.join(config["output_dir"], config["data_folder"]))
-
-    positive_train_output_dir = os.path.join(config["output_dir"], config["data_folder"], "positive_train")
-    positive_test_output_dir = os.path.join(config["output_dir"], config["data_folder"], "positive_test")
-    negative_train_output_dir = os.path.join(config["output_dir"], config["data_folder"], "negative_train")
-    negative_test_output_dir = os.path.join(config["output_dir"], config["data_folder"], "negative_test")
-    feature_save_dir = os.path.join(config["output_dir"], config["data_folder"])
+    # # Define output locations
+    # config["output_dir"] = os.path.abspath(config["output_dir"])
+    # if not os.path.exists(config["output_dir"]):
+    #     os.mkdir(config["output_dir"])
+    # if not os.path.exists(os.path.join(config["output_dir"], config["data_folder"])):
+    #     os.mkdir(os.path.join(config["output_dir"], config["data_folder"]))
 
     # Get paths for impulse response and background audio files
     rir_paths = [i.path for j in config["rir_paths"] for i in os.scandir(j)]
@@ -1556,7 +1513,6 @@ if __name__ == '__main__':
 
     # Do Data Augmentation
     if args.augment_clips is True:
-
         # # Set the total length of the training clips based on the ~median generated clip duration, rounding to the nearest 1000 samples
         # # and setting to 32000 when the median + 750 ms is close to that, as it's a good default value
         # n = 50  # sample size
@@ -1565,17 +1521,19 @@ if __name__ == '__main__':
         # for i in range(n):
         #     sr, dat = scipy.io.wavfile.read(positive_clips[np.random.randint(0, len(positive_clips))])
         #     duration_in_samples.append(len(dat))
-
         # config["total_length"] = int(round(np.median(duration_in_samples)/1000)*1000) + 12000  # add 750 ms to clip duration as buffer
         # if config["total_length"] < 32000:
         #     config["total_length"] = 32000  # set a minimum of 32000 samples (2 seconds)
         # elif abs(config["total_length"] - 32000) <= 4000:
         #     config["total_length"] = 32000
-
         config["total_length"] = 32000
 
-        if not os.path.exists(os.path.join(feature_save_dir, "positive_features_train.npy")) or args.overwrite is True:
-            
+        positive_train_output_dir = os.path.join(audio_folder, "positive_train")
+        positive_test_output_dir = os.path.join(audio_folder, "positive_test")
+        negative_train_output_dir = os.path.join(audio_folder, "negative_train")
+        negative_test_output_dir = os.path.join(audio_folder, "negative_test")
+
+        if not os.path.exists(os.path.join(augmented_audio_folder, "positive_features_train.npy")) or args.overwrite is True:
             # Load default augmentation probabilities
             default_augmentation_probabilities = {
                 "SevenBandParametricEQ": 0.25,
@@ -1624,25 +1582,25 @@ if __name__ == '__main__':
                 n_cpus = n_cpus//2
             compute_features_from_generator(positive_clips_train_generator, n_total=len(positive_clips_train), #n_total=len(os.listdir(positive_train_output_dir)),
                                             clip_duration=config["total_length"],
-                                            output_file=os.path.join(feature_save_dir, "positive_features_train.npy"),
+                                            output_file=os.path.join(augmented_audio_folder, "positive_features_train.npy"),
                                             device="gpu" if torch.cuda.is_available() else "cpu",
                                             ncpu=n_cpus if not torch.cuda.is_available() else 1)
 
             compute_features_from_generator(positive_clips_test_generator, n_total=len(positive_clips_test), # n_total=len(os.listdir(positive_test_output_dir)),
                                             clip_duration=config["total_length"],
-                                            output_file=os.path.join(feature_save_dir, "positive_features_test.npy"),
+                                            output_file=os.path.join(augmented_audio_folder, "positive_features_test.npy"),
                                             device="gpu" if torch.cuda.is_available() else "cpu",
                                             ncpu=n_cpus if not torch.cuda.is_available() else 1)
             
             compute_features_from_generator(negative_clips_train_generator, n_total=len(negative_clips_train), #n_total=len(os.listdir(negative_train_output_dir)),
                                             clip_duration=config["total_length"],
-                                            output_file=os.path.join(feature_save_dir, "negative_features_train.npy"),
+                                            output_file=os.path.join(augmented_audio_folder, "negative_features_train.npy"),
                                             device="gpu" if torch.cuda.is_available() else "cpu",
                                             ncpu=n_cpus if not torch.cuda.is_available() else 1)
 
             compute_features_from_generator(negative_clips_test_generator, n_total=len(negative_clips_test), # n_total=len(os.listdir(negative_test_output_dir)),
                                             clip_duration=config["total_length"],
-                                            output_file=os.path.join(feature_save_dir, "negative_features_test.npy"),
+                                            output_file=os.path.join(augmented_audio_folder, "negative_features_test.npy"),
                                             device="gpu" if torch.cuda.is_available() else "cpu",
                                             ncpu=n_cpus if not torch.cuda.is_available() else 1)
         else:
@@ -1651,7 +1609,7 @@ if __name__ == '__main__':
     # Create openwakeword model
     if args.train_model is True:
         F = openwakeword.utils.AudioFeatures(device='cpu')
-        input_shape = np.load(os.path.join(feature_save_dir, "positive_features_test.npy")).shape[1:]
+        input_shape = np.load(os.path.join(augmented_audio_folder, "positive_features_test.npy")).shape[1:]
         config["hidden_layers"]  =         1 if ("hidden_layers"  not in config or config["hidden_layers"]  == None) else config["hidden_layers"]
         config["weighting_mode"] = "default" if ("weighting_mode" not in config or config["weighting_mode"] == None) else config["weighting_mode"]
 
@@ -1691,8 +1649,8 @@ if __name__ == '__main__':
                 label_transforms[key] = negative_label_transform
 
         # Add generated positive and adversarial negative clips to the feature data files dictionary
-        config["feature_data_files"]['positive'] = os.path.join(feature_save_dir, "positive_features_train.npy")
-        config["feature_data_files"]['adversarial_negative'] = os.path.join(feature_save_dir, "negative_features_train.npy")
+        config["feature_data_files"]['positive'] = os.path.join(augmented_audio_folder, "positive_features_train.npy")
+        config["feature_data_files"]['adversarial_negative'] = os.path.join(augmented_audio_folder, "negative_features_train.npy")
 
         # Make PyTorch data loaders for training and validation data
         batch_generator = mmap_batch_generator(
@@ -1725,8 +1683,8 @@ if __name__ == '__main__':
             batch_size=len(X_val_fp_labels)
         )
 
-        X_val_pos = np.load(os.path.join(feature_save_dir, "positive_features_test.npy"))
-        X_val_neg = np.load(os.path.join(feature_save_dir, "negative_features_test.npy"))
+        X_val_pos = np.load(os.path.join(augmented_audio_folder, "positive_features_test.npy"))
+        X_val_neg = np.load(os.path.join(augmented_audio_folder, "negative_features_test.npy"))
         labels = np.hstack((np.ones(X_val_pos.shape[0]), np.zeros(X_val_neg.shape[0]))).astype(np.float32)
 
         X_val = torch.utils.data.DataLoader(
@@ -1762,3 +1720,45 @@ if __name__ == '__main__':
         # Convert the model from onnx to tflite format
         convert_onnx_to_tflite(os.path.join(config["output_dir"], config["model_name"] + ".onnx"),
                                os.path.join(config["output_dir"], config["model_name"] + ".tflite"))
+
+if __name__ == '__main__':
+    # Get training config file
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--training_config",
+        help="The path to the training config file (required)",
+        type=str,
+        required=True
+    )
+    parser.add_argument(
+        "--generate_clips",
+        help="Execute the synthetic data generation process",
+        action="store_true",
+        default="False",
+        required=False
+    )
+    parser.add_argument(
+        "--augment_clips",
+        help="Execute the synthetic data augmentation process",
+        action="store_true",
+        default="False",
+        required=False
+    )
+    parser.add_argument(
+        "--overwrite",
+        help="Overwrite existing openwakeword features when the --augment_clips flag is used",
+        action="store_true",
+        default="False",
+        required=False
+    )
+    parser.add_argument(
+        "--train_model",
+        help="Execute the model training process",
+        action="store_true",
+        default="False",
+        required=False
+    )
+
+    args = parser.parse_args()
+
+    main(Model, convert_onnx_to_tflite, args)

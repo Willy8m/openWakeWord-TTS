@@ -5,7 +5,10 @@ import subprocess
 import pathlib
 import json
 import time
-import os
+
+"""
+uvicorn api:app --reload --port 8000
+"""
 
 app = FastAPI()
 

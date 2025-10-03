@@ -1,4 +1,5 @@
 # pipeline.py
+from pathlib import Path
 import subprocess
 import os
 import sys
@@ -9,8 +10,11 @@ import argparse
 # -----------------------------
 # Configuration
 # -----------------------------
-OUTPUTS_DIR = "outputs"
-SCRIPTS_DIR = "scripts"
+PROJECT_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
+OUTPUTS_DIR = PROJECT_DIR / "outputs"
+SCRIPTS_DIR = PROJECT_DIR / "scripts"
+DATA_DIR = "F:/data"
+LOCALE = "es-es"
 
 # Enable logging
 logging.basicConfig(
@@ -56,10 +60,10 @@ def pipeline(wakewords):
         create_folders(config_dir, txt_dir, audio_dir, aug_dir, model_dir)
 
         # Step 0: Generate training config file
-        run_step("generate_config.py", wakeword=wakeword, output_folder=config_dir)
+        run_step("generate_config.py", wakeword=wakeword, output_folder=config_dir, data_dir=DATA_DIR)
         
         # Step 1: Generate text (OpenAI)
-        run_step("generate_text.py", output_folder=txt_dir)
+        run_step("generate_text.py", output_folder=txt_dir, locale=LOCALE)
         
         # Step 2: TTS conversion
         run_step("tts.py", input_folder=txt_dir, output_folder=audio_dir)
@@ -68,10 +72,10 @@ def pipeline(wakewords):
         run_step("augment.py", input_folder=audio_dir, output_folder=aug_dir, config_dir=config_dir)
         
         # Step 4: Model training
-        run_step("train.py", input_folder=aug_dir, model_output=model_dir, config_dir=config_dir)
+        run_step("train.py", input_folder=aug_dir, output_folder=model_dir, config_dir=config_dir)
         
-        # Step 5: Upload to blob storage
-        run_step("upload_blob.py", model_folder=model_dir, wakeword=wakeword)
+        # # Step 5: Upload to blob storage
+        # run_step("upload_blob.py", model_folder=model_dir, wakeword=wakeword)
         
         logging.info(f"=== Pipeline finished for wakeword: {wakeword} ===\n")
 
