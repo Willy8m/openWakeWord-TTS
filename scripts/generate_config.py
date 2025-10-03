@@ -85,19 +85,17 @@ def generate_training_config_yaml(wakeword_dir, data_dir: str, wakeword: str, da
 def main():
     parser = argparse.ArgumentParser(description="Generate a YAML config for wakeword training.")
     parser.add_argument("--wakeword", required=True)
-    parser.add_argument("--outputs_dir", required=True, type=Path)
-    parser.add_argument("--timestamp", required=True, type=str)
+    parser.add_argument("--output_folder", required=True)
     parser.add_argument("--data_version", required=False, type=int, default=1, help=f"Version of the positive and adversarial data")
     parser.add_argument("--data_dir", required=False, type=Path, default="./data/")
     args = parser.parse_args()
 
     wakeword = args.wakeword
-    outputs_dir = args.outputs_dir
-    timestamp = args.timestamp
+    output_folder = Path(args.outputs_dir)
     data_dir = args.data_dir
 
-    wakeword_dir = outputs_dir / wakeword
-    config_dir = wakeword_dir / "config"
+    wakeword_dir = output_folder.parent.parent
+    timestamp = output_folder.parts[-1]
 
     data_version = args.data_version if args.data_version else get_next_data_version(wakeword_dir, wakeword)
     model_version = 0 if (data_version != args.data_version) else get_next_model_version(wakeword_dir, wakeword, data_version, CODE_VERSION)
@@ -112,7 +110,7 @@ def main():
 
     # Save YAML file
     yaml_filename = f"{wakeword}_v{data_version}_{CODE_VERSION}_{model_version}.yaml"
-    yaml_path = config_dir / timestamp / yaml_filename
+    yaml_path = output_folder / yaml_filename
 
     with open(yaml_path, "w") as f:
         yaml.dump(config, f, sort_keys=False)

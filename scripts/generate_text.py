@@ -1,5 +1,6 @@
 import os
 import argparse
+from pathlib import Path
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 
@@ -27,7 +28,7 @@ client = AzureOpenAI(
 
 def generate_variations(wakeword: str):
     """Generate positive and negative phonetic variations for a wakeword."""
-    
+
     positive_prompt = f"""
     Generate a list of at least 15 positive phonetic variations for the wakeword "{wakeword}".
     These should sound similar but represent natural pronunciation variations, accents, or small distortions.
@@ -84,7 +85,9 @@ def main(output_folder: str, wakeword: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate phonetic variations for a wakeword.")
     parser.add_argument("--output_folder", type=str, required=True, help="Folder to save pos.txt and neg.txt")
-    parser.add_argument("--wakeword", type=str, required=True, help="Target wakeword")
     args = parser.parse_args()
 
-    main(args.output_folder, args.wakeword)
+    output_folder = Path(args.output_folder)
+    wakeword = output_folder.parent.parent
+
+    main(output_folder, wakeword)

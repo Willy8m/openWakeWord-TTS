@@ -56,10 +56,10 @@ def pipeline(wakewords):
         create_folders(config_dir, txt_dir, audio_dir, aug_dir, model_dir)
 
         # Step 0: Generate training config file
-        run_step("generate_config.py", wakeword=wakeword, outputs_dir=OUTPUTS_DIR, timestamp=timestamp)
+        run_step("generate_config.py", wakeword=wakeword, output_folder=config_dir)
         
         # Step 1: Generate text (OpenAI)
-        run_step("generate_text.py", output_folder=txt_dir, config_dir=config_dir)
+        run_step("generate_text.py", output_folder=txt_dir)
         
         # Step 2: TTS conversion
         run_step("tts.py", input_folder=txt_dir, output_folder=audio_dir)
